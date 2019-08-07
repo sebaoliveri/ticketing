@@ -15,7 +15,7 @@ object Theater {
   case class CreateTheater(name: Name, address: Address)
   case class TheaterCreated(name: Name, address: Address)
 
-  case class StartShowCreation(showName: Name, timeFrames: List[TimeSlot])
+  case class StartShowCreation(showName: Name, timeSlots: List[TimeSlot])
 }
 
 class Theater(name: String, showCreation: ActorRef, calendar: ActorRef) extends PersistentActor {
@@ -36,9 +36,9 @@ class Theater(name: String, showCreation: ActorRef, calendar: ActorRef) extends 
         sender() ! evt
       }
 
-    case StartShowCreation(showName, timeFrames) =>
-      (calendar ? ReserveTimeSlots(timeFrames)).mapTo[TimeSlotsReserved].map { _ =>
-        showCreation ! TheaterShowCreation.StartShowCreation(state.name, showName, timeFrames)
+    case StartShowCreation(showName, timeSlots) =>
+      (calendar ? ReserveTimeSlots(timeSlots)).mapTo[TimeSlotsReserved].map { _ =>
+        showCreation ! TheaterShowCreation.StartShowCreation(state.name, showName, timeSlots)
         sender() ! Done
       }.recover { case exception: InvalidArgumentException =>
         sender() ! akka.actor.Status.Failure(exception)

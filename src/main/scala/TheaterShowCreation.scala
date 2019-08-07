@@ -1,7 +1,6 @@
 
 import akka.actor.ActorRef
 import akka.persistence.PersistentActor
-import akka.pattern._
 import scala.concurrent.duration._
 import Arguments._
 
@@ -12,8 +11,8 @@ object TheaterShowCreation {
   val SectionNotDefined = "The section does not exist"
   val MissingPrices = "Prices must be specified for every defined section"
 
-  case class StartShowCreation(theaterName: Name, showName: Name, timeFrames: List[TimeSlot])
-  case class ShowCreationStarted(id: String, theaterName: Name, showName: Name, timeFrames: List[TimeSlot])
+  case class StartShowCreation(theaterName: Name, showName: Name, timeSlots: List[TimeSlot])
+  case class ShowCreationStarted(id: String, theaterName: Name, showName: Name, timeSlots: List[TimeSlot])
 
   case class AddSection(section: Section)
   case class SectionAdded(id: String, section: Section)
@@ -85,7 +84,7 @@ class TheaterShowCreation(id: String, calendar: ActorRef) extends PersistentActo
     case FinishShowCreation =>
       Try(state.asFinished()) match {
         case Success(theaterShowCreation) =>
-          calendar ! ConfirmTimeSlotsReservation(state.timeFrames)
+          calendar ! ConfirmTimeSlotsReservation(state.timeSlots)
           persist(ShowCreationFinished()) { evt =>
             state = theaterShowCreation
             sender() ! evt
@@ -98,7 +97,7 @@ class TheaterShowCreation(id: String, calendar: ActorRef) extends PersistentActo
 
   val cancelCreationHandler: Receive = {
     case CancelShowCreation =>
-      calendar ! UnreserveTimeSlots(state.timeFrames)
+      calendar ! UnreserveTimeSlots(state.timeSlots)
       persist(ShowCreationCancelled()) { evt =>
         state = state.asCancelled()
         sender() ! evt
@@ -107,9 +106,9 @@ class TheaterShowCreation(id: String, calendar: ActorRef) extends PersistentActo
   }
 
   val creationHandler: Receive = {
-    case StartShowCreation(theaterName, showName, timeFrames) =>
-      persist(ShowCreationStarted(id, theaterName, showName, timeFrames)) { event =>
-        state = TheaterShowCreationState(theaterName, showName, timeFrames)
+    case StartShowCreation(theaterName, showName, timeSlots) =>
+      persist(ShowCreationStarted(id, theaterName, showName, timeSlots)) { event =>
+        state = TheaterShowCreationState(theaterName, showName, timeSlots)
         sender ! event
       }
       context.become(sectionsHandler orElse pricesHandler orElse cancelCreationHandler orElse finishCreationHandler)
@@ -120,7 +119,7 @@ class TheaterShowCreation(id: String, calendar: ActorRef) extends PersistentActo
 
 case class TheaterShowCreationState(theaterName: Name,
                                     showName: Name,
-                                    timeFrames: List[TimeSlot] = Nil,
+                                    timeSlots: List[TimeSlot] = Nil,
                                     sections: List[Section] = Nil,
                                     priceBySection: Map[String, Money] = Map.empty,
                                     state: TheaterShowCreation.State = TheaterShowCreation.InProgress) {
