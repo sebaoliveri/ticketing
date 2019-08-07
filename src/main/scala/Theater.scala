@@ -32,14 +32,9 @@ class Theater(name: String, showCreation: ActorRef, calendar: ActorRef) extends 
 
   override def receiveCommand: Receive = {
     case CreateTheater(name, address) =>
-      Try(TheaterState(name, address)) match {
-        case Success(theater) =>
-          persist(TheaterCreated(name, address)) { evt =>
-            state = theater
-            sender() ! evt
-          }
-        case Failure(exception) =>
-          sender() ! akka.actor.Status.Failure(exception)
+      persist(TheaterCreated(name, address)) { evt =>
+        state = TheaterState(name, address)
+        sender() ! evt
       }
 
     case StartShowCreation(showName, timeFrames) =>
