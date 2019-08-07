@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ce5f919a-59b7-442f-ab9f-b78733935263" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/scala/TheaterState.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/Theater.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/Theater.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/Theater.scala" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -31,11 +31,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Theater.scala" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Theater.scala" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/Theater.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="267">
-              <caret line="41" column="45" selection-start-line="41" selection-start-column="45" selection-end-line="41" selection-end-column="45" />
+            <state relative-caret-position="309">
+              <caret line="40" column="34" lean-forward="true" selection-start-line="40" selection-start-column="34" selection-end-line="40" selection-end-column="34" />
               <folding>
                 <element signature="e#1#19#0" expanded="true" />
               </folding>
@@ -43,11 +43,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="TheaterShowCreation.scala" pinned="false" current-in-tab="false">
+      <file leaf-file-name="TheaterShowCreation.scala" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/scala/TheaterShowCreation.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="196">
-              <caret line="90" column="26" lean-forward="true" selection-start-line="90" selection-start-column="26" selection-end-line="90" selection-end-column="26" />
+            <state relative-caret-position="115">
+              <caret line="43" lean-forward="true" selection-start-line="43" selection-end-line="43" />
               <folding>
                 <element signature="e#1#27#0" expanded="true" />
                 <element signature="e#1561#1589#0" expanded="true" />
@@ -98,13 +98,13 @@
         <option value="$PROJECT_DIR$/src/main/scala/Money.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/Section.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/Test.sc" />
-        <option value="$PROJECT_DIR$/src/main/scala/Theater.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/TimeFrame.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/TimeSlot.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/Calendar.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/Name.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/TheaterShowCreation.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/TheaterState.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/Theater.scala" />
       </list>
     </option>
   </component>
@@ -860,23 +860,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/TheaterShowCreation.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/Theater.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="196">
-          <caret line="90" column="26" lean-forward="true" selection-start-line="90" selection-start-column="26" selection-end-line="90" selection-end-column="26" />
+        <state relative-caret-position="309">
+          <caret line="40" column="34" lean-forward="true" selection-start-line="40" selection-start-column="34" selection-end-line="40" selection-end-column="34" />
           <folding>
-            <element signature="e#1#27#0" expanded="true" />
-            <element signature="e#1561#1589#0" expanded="true" />
+            <element signature="e#1#19#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/Theater.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/TheaterShowCreation.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="267">
-          <caret line="41" column="45" selection-start-line="41" selection-start-column="45" selection-end-line="41" selection-end-column="45" />
+        <state relative-caret-position="115">
+          <caret line="43" lean-forward="true" selection-start-line="43" selection-end-line="43" />
           <folding>
-            <element signature="e#1#19#0" expanded="true" />
+            <element signature="e#1#27#0" expanded="true" />
+            <element signature="e#1561#1589#0" expanded="true" />
           </folding>
         </state>
       </provider>

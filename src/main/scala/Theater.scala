@@ -9,7 +9,6 @@ import akka.util.Timeout
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.duration._
-import scala.util.{Failure, Success, Try}
 
 object Theater {
 
@@ -43,8 +42,6 @@ class Theater(name: String, showCreation: ActorRef, calendar: ActorRef) extends 
         sender() ! Done
       }.recover { case exception: InvalidArgumentException =>
         sender() ! akka.actor.Status.Failure(exception)
-        unstashAll
-        context.unbecome
       }
   }
 
