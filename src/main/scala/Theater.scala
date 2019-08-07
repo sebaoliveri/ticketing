@@ -45,7 +45,9 @@ class Theater(name: String, showCreation: ActorRef, calendar: ActorRef) extends 
       }
   }
 
-  override def receiveRecover: Receive = ???
+  override def receiveRecover: Receive = {
+    case TheaterCreated(name, address) => state = TheaterState(name, address)
+  }
 }
 
 case class TheaterState(name: Name, address: Address)

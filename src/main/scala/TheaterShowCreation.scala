@@ -110,11 +110,27 @@ class TheaterShowCreation(id: String, calendar: ActorRef) extends PersistentActo
       persist(ShowCreationStarted(id, theaterName, showName, timeSlots)) { event =>
         state = TheaterShowCreationState(theaterName, showName, timeSlots)
         sender ! event
+        context.become(sectionsHandler orElse pricesHandler orElse cancelCreationHandler orElse finishCreationHandler)
       }
-      context.become(sectionsHandler orElse pricesHandler orElse cancelCreationHandler orElse finishCreationHandler)
   }
 
-  override def receiveRecover: Receive = ???
+  override def receiveRecover: Receive = {
+    case ShowCreationStarted(_, theaterName: Name, showName: Name, timeSlots: List[TimeSlot]) =>
+      state = TheaterShowCreationState(theaterName, showName, timeSlots)
+      context.become(sectionsHandler orElse pricesHandler orElse cancelCreationHandler orElse finishCreationHandler)
+    case SectionAdded(_, section: Section) =>
+      state = state.addSection(section)
+    case SectionRemoved(_, name: String) =>
+      state = state.removeSection(name)
+    case SectionPriceSet(_, name: String, price: Money) =>
+      state = state.setPrice(name, price)
+    case ShowCreationFinished() =>
+      state = state.asFinished()
+      context.become(Map.empty)
+    case ShowCreationCancelled() =>
+      state = state.asCancelled()
+      context.become(Map.empty)
+  }
 }
 
 case class TheaterShowCreationState(theaterName: Name,
