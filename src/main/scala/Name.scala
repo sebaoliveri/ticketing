@@ -1,7 +1,6 @@
 import Arguments._
 
-case class Name(string: String) {
-
-  string mustBe(notBlank, "name is required")
-  string mustBe(alphabetic, "name must contain alphabetic characters only")
+case class Name(name: String) {
+  name mustBe(notBlank, "name is required")
+  name mustBe(alphabetic, "name must contain alphabetic characters only")
 }

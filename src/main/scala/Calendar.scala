@@ -6,6 +6,8 @@ import scala.util.{Failure, Success, Try}
 object Calendar {
   val TimeSlotOverlapped = "TimeSlot overlaps"
 
+  sealed trait Command
+
   case class ReserveTimeSlots(timeSlots: List[TimeSlot])
   case class TimeSlotsReserved(id: String, timeSlots: List[TimeSlot])
 
@@ -17,34 +19,34 @@ object Calendar {
 }
 
 // ID must be the theater name
-class Calendar(id: String) extends PersistentActor {
+class Calendar(theaterId: String) extends PersistentActor {
 
   import Calendar._
 
   var state: CalendarState = CalendarState()
 
-  override def persistenceId: String = id
+  override def persistenceId: String = theaterId
 
   override def receiveCommand: Receive = {
     case ReserveTimeSlots(timeSlots) =>
       Try(state.reserve(timeSlots)) match {
         case Success(newState) =>
-          persist(TimeSlotsReserved(id, timeSlots)) { evt =>
+          persist(TimeSlotsReserved(theaterId, timeSlots)) { event =>
             state = newState
-            sender() ! evt
+            sender() ! event
           }
         case Failure(exception) =>
           sender() ! akka.actor.Status.Failure(exception)
       }
     case UnreserveTimeSlots(timeSlots) =>
-      persist(TimeSlotsUnreserved(id, timeSlots)) { evt =>
+      persist(TimeSlotsUnreserved(theaterId, timeSlots)) { event =>
         state = state.unreserve(timeSlots)
-        sender() ! evt
+        sender() ! event
       }
     case ConfirmTimeSlotsReservation(timeSlots) =>
-      persist(TimeSlotsReservationConfirmed(id, timeSlots)) { evt =>
+      persist(TimeSlotsReservationConfirmed(theaterId, timeSlots)) { event =>
         state = state.confirm(timeSlots)
-        sender() ! evt
+        sender() ! event
       }
   }
 
