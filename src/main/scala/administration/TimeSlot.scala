@@ -1,6 +1,8 @@
+package administration
+
 import java.time.LocalDateTime
 
-import Arguments._
+import util.Arguments.InvalidArgumentException
 
 case class TimeSlot(startingDateTime: LocalDateTime, endingDateTime: LocalDateTime) {
 

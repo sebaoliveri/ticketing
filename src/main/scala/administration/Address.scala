@@ -1,5 +1,7 @@
+package administration
 
-import Arguments._
+
+import util.Arguments.{alphabetic, alphanumeric, notBlank, _}
 
 case object Address {
   val StreetRequired = "street is required"

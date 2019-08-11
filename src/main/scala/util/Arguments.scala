@@ -1,3 +1,5 @@
+package util
+
 object Arguments extends {
 
   implicit final class ArgumentAssert[A](private val self: A) extends AnyVal {

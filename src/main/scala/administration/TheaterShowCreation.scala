@@ -1,9 +1,11 @@
+package administration
 
+
+import util.Arguments.InvalidArgumentException
 import akka.actor.ActorRef
 import akka.persistence.PersistentActor
-import scala.concurrent.duration._
-import Arguments._
 
+import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 
 object TheaterShowCreation {
@@ -38,8 +40,8 @@ object TheaterShowCreation {
 // ID must be Theater name + show name
 class TheaterShowCreation(id: String, calendar: ActorRef) extends PersistentActor {
 
-  import TheaterShowCreation._
   import Calendar._
+  import TheaterShowCreation._
 
   implicit val timeout: FiniteDuration = 20 seconds
 

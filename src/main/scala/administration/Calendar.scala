@@ -1,4 +1,6 @@
-import Arguments.InvalidArgumentException
+package administration
+
+import util.Arguments.InvalidArgumentException
 import akka.persistence.PersistentActor
 
 import scala.util.{Failure, Success, Try}

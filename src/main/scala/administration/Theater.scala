@@ -1,10 +1,12 @@
+package administration
 
-import Arguments._
-import Calendar.{ReserveTimeSlots, TimeSlotsReserved}
+
+import util.Arguments.InvalidArgumentException
+import administration.Calendar.{ReserveTimeSlots, TimeSlotsReserved}
 import akka.Done
 import akka.actor.ActorRef
-import akka.persistence.PersistentActor
 import akka.pattern._
+import akka.persistence.PersistentActor
 import akka.util.Timeout
 
 import scala.concurrent.ExecutionContextExecutor
