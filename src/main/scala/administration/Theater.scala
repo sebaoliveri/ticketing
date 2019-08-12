@@ -1,9 +1,8 @@
 package administration
 
-
 import util.Arguments.InvalidArgumentException
 import administration.Calendar.{ReserveTimeSlots, TimeSlotsReserved}
-import akka.Done
+import akka.{ActorStateTransition, Done}
 import akka.actor.ActorRef
 import akka.pattern._
 import akka.persistence.PersistentActor
@@ -11,6 +10,7 @@ import akka.util.Timeout
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.duration._
+import scala.util.{Success, Try}
 
 object Theater {
 
@@ -20,27 +20,26 @@ object Theater {
   case class StartShowCreation(showName: Name, timeSlots: List[TimeSlot])
 }
 
-class Theater(name: String, showCreation: ActorRef, calendar: ActorRef) extends PersistentActor {
+class Theater(id: String, showCreation: ActorRef, calendar: ActorRef) extends PersistentActor with ActorStateTransition {
 
   import Theater._
 
   implicit val executionContext: ExecutionContextExecutor = context.dispatcher
   implicit val timeout: Timeout = 20 seconds
 
-  var state: TheaterState = _
+  type S = TheaterState
 
-  override def persistenceId: String = name
+  override def persistenceId: String = id
+
+  val createTheater: TheaterCreated => Try[S] = event => Success(TheaterState(event.name, event.address))
 
   override def receiveCommand: Receive = {
     case CreateTheater(name, address) =>
-      persist(TheaterCreated(name, address)) { evt =>
-        state = TheaterState(name, address)
-        sender() ! evt
-      }
+      applyPersisting(createTheater)(TheaterCreated(name, address))
 
     case StartShowCreation(showName, timeSlots) =>
       (calendar ? ReserveTimeSlots(timeSlots)).mapTo[TimeSlotsReserved].map { _ =>
-        showCreation ! TheaterShowCreation.StartShowCreation(state.name, showName, timeSlots)
+        showCreation ! ShowCreation.StartShowCreation(state.name, showName, timeSlots)
         sender() ! Done
       }.recover { case exception: InvalidArgumentException =>
         sender() ! akka.actor.Status.Failure(exception)
@@ -48,7 +47,7 @@ class Theater(name: String, showCreation: ActorRef, calendar: ActorRef) extends 
   }
 
   override def receiveRecover: Receive = {
-    case TheaterCreated(name, address) => state = TheaterState(name, address)
+    case evt:TheaterCreated => applySuccess(createTheater)(evt)
   }
 }
 

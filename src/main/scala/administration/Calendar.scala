@@ -21,19 +21,19 @@ object Calendar {
 }
 
 // ID must be the theater name
-class Calendar(theaterId: String) extends PersistentActor {
+class Calendar(id: String) extends PersistentActor {
 
   import Calendar._
 
   var state: CalendarState = CalendarState()
 
-  override def persistenceId: String = theaterId
+  override def persistenceId: String = id
 
   override def receiveCommand: Receive = {
     case ReserveTimeSlots(timeSlots) =>
       Try(state.reserve(timeSlots)) match {
         case Success(newState) =>
-          persist(TimeSlotsReserved(theaterId, timeSlots)) { event =>
+          persist(TimeSlotsReserved(id, timeSlots)) { event =>
             state = newState
             sender() ! event
           }
@@ -41,12 +41,12 @@ class Calendar(theaterId: String) extends PersistentActor {
           sender() ! akka.actor.Status.Failure(exception)
       }
     case UnreserveTimeSlots(timeSlots) =>
-      persist(TimeSlotsUnreserved(theaterId, timeSlots)) { event =>
+      persist(TimeSlotsUnreserved(id, timeSlots)) { event =>
         state = state.unreserve(timeSlots)
         sender() ! event
       }
     case ConfirmTimeSlotsReservation(timeSlots) =>
-      persist(TimeSlotsReservationConfirmed(theaterId, timeSlots)) { event =>
+      persist(TimeSlotsReservationConfirmed(id, timeSlots)) { event =>
         state = state.confirm(timeSlots)
         sender() ! event
       }
@@ -71,7 +71,8 @@ case class CalendarState(occupiedTimeSlots: List[TimeSlot] = Nil, reservedTimeSl
     copy(reservedTimeSlots = reservedTimeSlots.diff(timeSlots))
 
   def confirm(timeSlots: List[TimeSlot]): CalendarState =
-    copy(reservedTimeSlots = reservedTimeSlots.diff(timeSlots), occupiedTimeSlots = occupiedTimeSlots ++ timeSlots)
+    copy(reservedTimeSlots = reservedTimeSlots.diff(timeSlots),
+      occupiedTimeSlots = occupiedTimeSlots ++ timeSlots)
 
   private def isOccupied(timeSlot: TimeSlot): Boolean =
     occupiedTimeSlots.union(reservedTimeSlots).exists(_.overlaps(timeSlot))
