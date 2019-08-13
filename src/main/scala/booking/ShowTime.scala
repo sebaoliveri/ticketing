@@ -2,16 +2,16 @@ package booking
 
 import administration.{Money, SeatLocation, Section, TimeSlot}
 import akka.Done
-import akka.actor.Status
+import akka.actor.{ActorRef, ActorSystem, Props, Status}
+import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
+import akka.cluster.sharding.ShardRegion.HashCodeMessageExtractor
 import akka.persistence.PersistentActor
 import booking.ShowTimeCommands.Reserve
 import booking.ShowTimeEvents.ReserveConfirmed
 
-import scala.util.{Failure, Success, Try}
-
 object ShowTimeCommands {
 
-  sealed trait Commad {
+  sealed trait Command {
     val showTimeId: String
   }
 
@@ -22,9 +22,12 @@ object ShowTimeCommands {
                      timeSlot: TimeSlot,
                      sections: Set[Section],
                      pricesBySection: Map[String, Money]
-                   ) extends Commad
+                   ) extends Command
 
-  case class Reserve(showTimeId: String, requestedSeats: Set[SeatLocation]) extends Commad
+  case class Reserve(
+                      showTimeId: String,
+                      requestedSeats: Set[SeatLocation]
+                    ) extends Command
 
 }
 
@@ -44,44 +47,48 @@ object ShowTimeEvents {
 
 object ShowTime {
 
-
+  def createRef()(implicit actorSystem: ActorSystem): ActorRef = {
+    val hashCodeMessageExtractor = new HashCodeMessageExtractor(3 * 10) {
+      override def entityId(message: Any): String = message match {
+        case command: ShowTimeCommands.Command => command.showTimeId
+      }
+    }
+    ClusterSharding(actorSystem)
+      .start("ShowTime", Props(new ShowTime), ClusterShardingSettings(actorSystem), hashCodeMessageExtractor)
+  }
 }
 
 class ShowTime extends PersistentActor {
   var showTimeState: ShowTimeState = _
 
-  override def persistenceId: String = self.path.name //ShowTime-{id}
+  override def persistenceId: String = "ShowTime" + self.path.name
 
   override def receiveCommand: Receive = {
     // case Create(...) => ...
-
-    case Reserve(_, requestedSeats) => showTimeState.reserve(requestedSeats) match {
-      case Success(newState) => persist(ReserveConfirmed(requestedSeats)) { _ =>
-        showTimeState = newState
-        sender() ! Done
+    case Reserve(_, requestedSeats) =>
+      val notBelongedLocations = requestedSeats.diff(showTimeState.allLocations).toList
+      val alreadyReserved = showTimeState.reservedSeats.intersect(requestedSeats).toList
+      notBelongedLocations -> alreadyReserved match {
+        case (Nil, Nil) => persist(ReserveConfirmed(requestedSeats)) { event =>
+          updateState(event)
+          sender() ! Done
+        }
+        case (_ :: _, Nil) => sender() ! Status.Failure(new Exception("SeatsNotBelongToTheater"))
+        case (_, _) => sender() ! Status.Failure(new Exception("SeatsAlreadyReserved"))
       }
-      case Failure(exception) => sender() ! Status.Failure(exception)
-    }
   }
 
   override def receiveRecover: Receive = {
-    // case Create(...) => ...
-    case ReserveConfirmed(seats) => showTimeState = showTimeState.copy(reservedSeats = seats)
+    // case event: Create => ...
+    case event: ReserveConfirmed => updateState(event)
+  }
+
+  def updateState(reserveConfirmed: ReserveConfirmed): Unit = {
+    showTimeState = showTimeState.copy(reservedSeats = showTimeState.reservedSeats ++ reserveConfirmed.seats)
   }
 
   case class ShowTimeState(timeSlot: TimeSlot, sections: Set[Section], reservedSeats: Set[SeatLocation]) {
     lazy val allLocations: Set[SeatLocation] = sections.flatten(_.locations)
-
-    def reserve(requestedSeats: Set[SeatLocation]): Try[ShowTimeState] = {
-      val notBelongedLocations = requestedSeats.diff(showTimeState.allLocations).toList
-      val alreadyReserverd = showTimeState.reservedSeats.intersect(requestedSeats).toList
-      notBelongedLocations -> alreadyReserverd match {
-        case (Nil, Nil) => Success(copy(reservedSeats = reservedSeats ++ requestedSeats))
-        case (_ :: _, Nil) => Failure(new Exception("SeatsNotBelongToTheater"))
-        case (_, _) => Failure(new Exception("SeatsAlreadyReserved"))
-      }
-    }
   }
 
 }
-
